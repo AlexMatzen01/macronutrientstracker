@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="A privacy-first macronutrient tracker with trend averages, evidence-based planning ranges, and portable data export.">
+  <title>MacroTrack — Macronutrient Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">M</div>
+        <div>
+          <strong>MacroTrack</strong>
+          <span>Fuel & trends</span>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Primary navigation">
+        <button class="nav-item active" data-tab="dashboard"><span>01</span> Dashboard</button>
+        <button class="nav-item" data-tab="log"><span>02</span> Daily log</button>
+        <button class="nav-item" data-tab="profile"><span>03</span> Profile & goals</button>
+        <button class="nav-item" data-tab="data"><span>04</span> Data & privacy</button>
+        <button class="nav-item" data-tab="research"><span>05</span> Research</button>
+      </nav>
+      <div class="privacy-chip">
+        <span class="status-dot"></span>
+        Local-first
+        <small>Your data stays in this browser until you export it.</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="todayLabel">TODAY</p>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <button class="ghost-btn" id="exportSeedTop">Export seed</button>
+          <button class="primary-btn" id="addLogTop">+ Log intake</button>
+        </div>
+      </header>
+
+      <section class="health-notice">
+        <strong>Nutrition tool, not medical care.</strong>
+        <span>Targets are planning estimates. They are not diagnoses or a substitute for a physician or registered dietitian.</span>
+      </section>
+
+      <div id="tab-dashboard" class="tab-panel active">
+        <section class="hero-grid">
+          <div class="hero-card">
+            <div class="hero-copy">
+              <p class="eyebrow">YOUR CURRENT PLAN</p>
+              <h2 id="targetHeadline">Set up your profile</h2>
+              <p id="targetSubline">Add your age, measurements, activity, and focus to calculate an evidence-informed macro plan.</p>
+            </div>
+            <div class="macro-targets" id="macroTargets">
+              <div class="target-pill muted"><span>Protein</span><b>—</b><small>g/day</small></div>
+              <div class="target-pill muted"><span>Carbs</span><b>—</b><small>g/day</small></div>
+              <div class="target-pill muted"><span>Fat</span><b>—</b><small>g/day</small></div>
+            </div>
+          </div>
+          <div class="mini-card">
+            <div class="card-title-row"><h3>BMI</h3><span class="tag">Screening only</span></div>
+            <div class="big-number" id="bmiValue">—</div>
+            <div class="muted-text" id="bmiStatus">Add height and weight in your profile.</div>
+            <p class="fine-print">BMI should not be used to diagnose a medical condition.</p>
+          </div>
+        </section>
+
+        <section class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Daily average</div>
+            <div class="stat-number" id="dailyAvgMain">—</div>
+            <div class="stat-detail" id="dailyAvgDetail">Last 7 tracked days</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Weekly average</div>
+            <div class="stat-number" id="weeklyAvgMain">—</div>
+            <div class="stat-detail" id="weeklyAvgDetail">Average per tracked week, last 4 weeks</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Monthly average</div>
+            <div class="stat-number" id="monthlyAvgMain">—</div>
+            <div class="stat-detail" id="monthlyAvgDetail">Average per tracked month, current month</div>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">LAST 7 DAYS</p>
+                <h3>Macro trend</h3>
+              </div>
+              <span class="tag" id="trendTag">No data</span>
+            </div>
+            <div class="trend-chart" id="trendChart"></div>
+            <div class="legend">
+              <span><i class="dot protein-dot"></i> Protein</span>
+              <span><i class="dot carbs-dot"></i> Carbs</span>
+              <span><i class="dot fat-dot"></i> Fat</span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <p class="eyebrow">SMART CHECK-IN</p>
+                <h3>Recommendations</h3>
+              </div>
+            </div>
+            <div id="recommendations" class="recommendations"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">RECENT INTAKE</p>
+              <h3>Latest logged days</h3>
+            </div>
+            <button class="text-btn" data-tab-target="log">View all</button>
+          </div>
+          <div id="recentEntries" class="entry-list"></div>
+        </section>
+      </div>
+
+      <div id="tab-log" class="tab-panel">
+        <section class="section-intro">
+          <p class="eyebrow">DAILY LOG</p>
+          <h2>Log the macros you actually ate.</h2>
+          <p>Enter grams of protein, carbohydrate, and fat. Calories are derived automatically using 4/4/9 kcal per gram.</p>
+        </section>
+
+        <section class="form-layout">
+          <form id="logForm" class="panel form-panel">
+            <div class="panel-head">
+              <div><h3>New entry</h3><span class="muted-text">One row per day keeps the averages clean.</span></div>
+            </div>
+            <label>Date<input id="logDate" type="date" required></label>
+            <div class="three-col">
+              <label>Protein (g)<input id="logProtein" type="number" min="0" step="0.1" inputmode="decimal" required></label>
+              <label>Carbs (g)<input id="logCarbs" type="number" min="0" step="0.1" inputmode="decimal" required></label>
+              <label>Fat (g)<input id="logFat" type="number" min="0" step="0.1" inputmode="decimal" required></label>
+            </div>
+            <label>Notes <span class="optional">optional</span><textarea id="logNotes" rows="4" placeholder="Training, school day, tournament, appetite, meals, or anything else useful for context."></textarea></label>
+            <div class="calc-preview">
+              <span>Derived energy</span>
+              <strong id="logCaloriesPreview">0 kcal</strong>
+            </div>
+            <button class="primary-btn full" type="submit">Save daily intake</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-head"><div><p class="eyebrow">HISTORY</p><h3>Tracked days</h3></div><span class="tag" id="entryCountTag">0 days</span></div>
+            <div id="allEntries" class="entry-list tall"></div>
+          </div>
+        </section>
+      </div>
+
+      <div id="tab-profile" class="tab-panel">
+        <section class="section-intro">
+          <p class="eyebrow">PROFILE & GOALS</p>
+          <h2>Give the calculator enough context to be useful.</h2>
+          <p>Values stay in your browser. The calculator uses your age, height, weight, activity level, and focus to choose a planning range.</p>
+        </section>
+
+        <section class="form-layout">
+          <form id="profileForm" class="panel form-panel">
+            <div class="form-section">
+              <div class="panel-head"><div><h3>Basics</h3><span class="muted-text">Canonical values are saved in metric units.</span></div></div>
+              <div class="segmented" role="group" aria-label="Units">
+                <button type="button" data-unit="metric" class="unit-btn active">Metric</button>
+                <button type="button" data-unit="us" class="unit-btn">US</button>
+              </div>
+              <div class="two-col">
+                <label>Age (years)<input id="ageInput" type="number" min="2" max="120" required></label>
+                <label>Sex used for the energy equation
+                  <select id="sexInput">
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="unspecified">Unspecified</option>
+                  </select>
+                </label>
+              </div>
+              <div id="metricFields" class="two-col">
+                <label>Height (cm)<input id="heightCmInput" type="number" min="80" max="250" step="0.1"></label>
+                <label>Weight (kg)<input id="weightKgInput" type="number" min="20" max="400" step="0.1"></label>
+              </div>
+              <div id="usFields" class="two-col hidden">
+                <label>Height (ft)<input id="heightFtInput" type="number" min="2" max="8" step="1"></label>
+                <label>Height (in)<input id="heightInInput" type="number" min="0" max="11.9" step="0.1"></label>
+                <label>Weight (lb)<input id="weightLbInput" type="number" min="44" max="880" step="0.1"></label>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="panel-head"><div><h3>Activity</h3><span class="muted-text">Pick the level that best represents a normal week.</span></div></div>
+              <label>Activity level
+                <select id="activityInput">
+                  <option value="sedentary">Mostly sitting / light movement</option>
+                  <option value="light">Light exercise 1–3 days/week</option>
+                  <option value="moderate">Moderate exercise 3–5 days/week</option>
+                  <option value="high">Hard exercise 6–7 days/week</option>
+                  <option value="athlete">Very high training volume</option>
+                </select>
+              </label>
+              <label>Primary focus
+                <select id="focusInput">
+                  <option value="general">General wellness</option>
+                  <option value="strength">Strength / resistance training</option>
+                  <option value="endurance">Endurance / distance sport</option>
+                  <option value="team">Team / field sport</option>
+                  <option value="high">High activity / mixed training</option>
+                  <option value="academics">Academics / long study days</option>
+                </select>
+              </label>
+              <label>Sport or routine <span class="optional">optional</span><input id="sportInput" type="text" placeholder="e.g. soccer, wrestling, running, basketball"></label>
+            </div>
+
+            <button class="primary-btn full" type="submit">Save profile & recalculate</button>
+          </form>
+
+          <div class="panel">
+            <div class="panel-head"><div><p class="eyebrow">CALCULATION</p><h3>How the math works</h3></div></div>
+            <div id="calculationBreakdown" class="breakdown"></div>
+            <div class="callout neutral">
+              <strong>BMI note</strong>
+              <p>For adults, BMI is weight in kg divided by height in meters squared. CDC treats BMI as a screening measure, not a diagnosis. For ages 2–19, CDC uses age- and sex-specific BMI-for-age percentiles instead of adult BMI categories.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="tab-data" class="tab-panel">
+        <section class="section-intro">
+          <p class="eyebrow">DATA & PRIVACY</p>
+          <h2>Your data is portable.</h2>
+          <p>MacroTrack uses localStorage only. Nothing is sent to a server by this app.</p>
+        </section>
+        <section class="content-grid">
+          <div class="panel">
+            <div class="panel-head"><div><p class="eyebrow">SEED EXPORT</p><h3>One long numeric string</h3></div></div>
+            <p class="muted-text">The seed encodes the app's JSON data as decimal bytes. It is portable, but it is not encrypted. Treat it like a copy of your private data.</p>
+            <textarea id="seedBox" rows="7" placeholder="Your numeric seed appears here after you export."></textarea>
+            <div class="button-row">
+              <button class="primary-btn" id="generateSeed">Generate seed</button>
+              <button class="ghost-btn" id="copySeed">Copy seed</button>
+              <button class="ghost-btn" id="importSeed">Import seed</button>
+            </div>
+            <p id="seedStatus" class="status-line"></p>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><div><p class="eyebrow">JSON BACKUP</p><h3>Download or restore</h3></div></div>
+            <p class="muted-text">JSON is the easiest format to inspect or back up. Importing replaces the current profile and logs with the selected backup.</p>
+            <div class="button-row">
+              <button class="primary-btn" id="downloadJson">Download .json</button>
+              <button class="ghost-btn" id="importJsonButton">Import .json</button>
+              <input id="jsonFile" type="file" accept="application/json,.json" class="hidden">
+            </div>
+            <div class="danger-zone">
+              <strong>Clear local data</strong>
+              <p>This removes the saved profile and all logged entries from this browser.</p>
+              <button class="danger-btn" id="clearData">Clear all local data</button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div id="tab-research" class="tab-panel">
+        <section class="section-intro">
+          <p class="eyebrow">RESEARCH NOTES</p>
+          <h2>Where the calculations come from.</h2>
+          <p>The app deliberately uses ranges and estimates rather than presenting any formula as an exact measurement.</p>
+        </section>
+        <section class="research-grid">
+          <article class="panel research-card">
+            <span class="source-kicker">ENERGY ESTIMATION</span>
+            <h3>Mifflin–St Jeor</h3>
+            <p>The adult resting metabolic rate estimate uses the Mifflin–St Jeor equation. A systematic review found it was more reliable than several common alternatives, while also noting meaningful individual error.</p>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/15883556/" target="_blank" rel="noreferrer">PubMed →</a>
+          </article>
+          <article class="panel research-card">
+            <span class="source-kicker">MACRONUTRIENTS</span>
+            <h3>National Academies</h3>
+            <p>The general adult planning ranges are informed by the Dietary Reference Intakes framework, which uses acceptable macronutrient distribution ranges rather than one “perfect” split.</p>
+            <a href="https://nap.nationalacademies.org/catalog/10490/dietary-reference-intakes-for-energy-carbohydrate-fiber-fat-fatty-acids-cholesterol-protein-and-amino-acids-macronutrients" target="_blank" rel="noreferrer">National Academies →</a>
+          </article>
+          <article class="panel research-card">
+            <span class="source-kicker">SPORTS NUTRITION</span>
+            <h3>Academy / DC / ACSM</h3>
+            <p>Sports-focused recommendations emphasize meeting energy and carbohydrate needs, adequate protein, hydration, and individualized planning based on the sport and training load.</p>
+            <a href="https://pubmed.ncbi.nlm.nih.gov/26920240/" target="_blank" rel="noreferrer">PubMed →</a>
+          </article>
+          <article class="panel research-card">
+            <span class="source-kicker">EXERCISE PROTEIN</span>
+            <h3>ISSN position stand</h3>
+            <p>The International Society of Sports Nutrition position stand supports roughly 1.4–2.0 g/kg/day of protein for most exercising people, with context-dependent individualization.</p>
+            <a href="https://jissn.biomedcentral.com/articles/10.1186/s12970-017-0177-8" target="_blank" rel="noreferrer">JISSN →</a>
+          </article>
+          <article class="panel research-card">
+            <span class="source-kicker">BMI</span>
+            <h3>CDC</h3>
+            <p>Adult BMI categories apply to adults 20 and older. For ages 2–19, CDC uses sex-specific BMI-for-age percentiles. In both cases BMI is a screening tool, not a medical diagnosis.</p>
+            <a href="https://www.cdc.gov/bmi/" target="_blank" rel="noreferrer">CDC BMI guidance →</a>
+          </article>
+          <article class="panel research-card">
+            <span class="source-kicker">DESIGN CHOICE</span>
+            <h3>No “cut” or “bulk” mode</h3>
+            <p>This version focuses on fueling, performance, and tracking. It does not generate automatic weight-loss or weight-gain calorie deficits/surpluses.</p>
+            <span class="muted-text">Use a clinician or registered dietitian for individualized medical nutrition plans.</span>
+          </article>
+        </section>
+      </div>
+
+      <footer class="footer">
+        <span>MacroTrack is a personal tracking tool. It does not diagnose or treat disease.</span>
+        <span>Data: localStorage only · Seed export: numeric, not encrypted</span>
+      </footer>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
