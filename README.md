@@ -27,6 +27,6 @@ The app is educational software, not medical care. A personalized sports or medi
 - ISSN protein position stand: https://jissn.biomedcentral.com/articles/10.1186/s12970-017-0177-8
 - CDC BMI guidance: https://www.cdc.gov/bmi/
 
-## Privacy
+### Privacy
 
 No backend is required. The app stores data in the browser's localStorage. Seed exports are encoded, not encrypted.
